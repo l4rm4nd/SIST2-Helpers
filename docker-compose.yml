@@ -1,0 +1,70 @@
+services:
+
+  # underlying search database to store the files and metadata
+  elasticsearch:
+    image: elasticsearch:7.17.9
+    container_name: sist2-es
+    volumes:
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/sist2-es-data/:/usr/share/elasticsearch/data
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g" # <-- adjust
+      - "PUID=1001" # <-- adjust
+      - "PGID=1001" # <-- adjust
+    #networks:
+    #  - proxy
+
+  # web interface used to configure the indexing jobs (8080) and provide search interface (4090)
+  # search interface (frontend) is not enabled per default
+  sist2-admin:
+    image: sist2app/sist2:x64-linux
+    container_name: sist2-admin
+    volumes:
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/sist2-admin-data/:/sist2-admin/
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/index:/host
+    expose:
+      - 4090 # user frontend for searching
+      - 8080 # admin backend for managing
+    working_dir: /root/sist2-admin/
+    entrypoint: python3
+    command:
+      - /root/sist2-admin/sist2_admin/app.py
+    #networks:
+    #  - proxy
+    #labels:
+    #  - traefik.enable=true
+    #  - traefik.docker.network=proxy
+    #  - traefik.http.routers.sist2-frontend.rule=Host(`sist2.example.com`)
+    #  - traefik.http.services.sist2-frontend.loadbalancer.server.port=4090
+    #  - traefik.http.routers.sist2-frontend.service=sist2-frontend
+    #  #- traefik.http.routers.sist2-frontend.middlewares=authentik@docker
+    #  # ------------- admin ---------------
+    #  - traefik.http.routers.sist2-admin.rule=Host(`sist2-admin.example.com`)
+    #  - traefik.http.services.sist2-admin.loadbalancer.server.port=8080
+    #  - traefik.http.routers.sist2-admin.service=sist2-admin
+    #  #- traefik.http.routers.sist2-admin.middlewares=authentik@docker
+
+  # web interface used to upload files for indexing
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: sist2-filebrowser
+    restart: unless-stopped
+    user: 1000:1000 # <-- adjust
+    expose:
+      - 80
+    volumes:
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/index:/srv
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/filebrowser/config:/config
+      - ${DOCKER_VOLUME_STORAGE:-/mnt/docker-volumes}/sist2/data/filebrowser/database:/database
+    #networks:
+    #  - proxy
+    #labels:
+    #  - traefik.enable=true
+    #  - traefik.docker.network=proxy
+    #  - traefik.http.routers.sist2-filebrowser.rule=Host(`sist2-upload.example.com`)
+    #  - traefik.http.services.sist2-filebrowser.loadbalancer.server.port=80
+    #  #- traefik.http.routers.sist2-filebrowser.middlewares=authentik@docker
+
+#networks:
+#  proxy:
+#    external: true
