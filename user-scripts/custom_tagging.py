@@ -29,7 +29,6 @@ for doc in index.document_iter():
         for key in ['content', 'fulltext', 'text', 'text_content', 'extracted_text']:
             if key in doc.json_data and doc.json_data[key] and isinstance(doc.json_data[key], str):
                 text = doc.json_data[key]
-                print(f"Found extracted text data in json_data['{key}'] for document {doc.path}. Search can be applied. ")
                 break
 
     # Check if text was found and if keyword is in it
