@@ -4,7 +4,7 @@ import re
 
 # Define the tag for email addresses
 tag_name = "e-mail"
-tag_color = "#FF0000"  # Red for visibility
+tag_color = "#fcb103"  # Red for visibility
 final_tag = f"{tag_name}.{tag_color}"
 
 # Define allowed email domains (case-insensitive)
