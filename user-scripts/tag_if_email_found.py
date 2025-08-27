@@ -4,20 +4,21 @@ import re
 
 # Define the tag for email addresses
 tag_name = "e-mail"
-tag_color = "#FCB103"  # Orange
+tag_color = "#FF0000"  # Red for visibility
 final_tag = f"{tag_name}.{tag_color}"
 
 # Define allowed email domains (case-insensitive)
+# will also tag any subdomains like test@admin.example.com
 allowed_domains = [
     "example.com",
     "company.org",
     "test.net"
 ]
 
-# Create regex pattern for email addresses with specific domains
+# Create regex pattern for email addresses with specific domains and subdomains
 # Escape dots in domains and join with | for regex
 domain_pattern = "|".join(re.escape(domain).replace(r'\.', r'\.') for domain in allowed_domains)
-email_pattern = re.compile(rf'[a-zA-Z0-9._%+-]+@({domain_pattern})\b', re.IGNORECASE)
+email_pattern = re.compile(rf'[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)*({domain_pattern})\b', re.IGNORECASE)
 
 # Load the index from the provided path
 index = Sist2Index(sys.argv[1])
